@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<connectors>
+    <!-- connector sample
+    
+    <app key="myApp">
+        <dataType key="myDataType">   
+            <id>myDataTypeIdField</id>
+            <dbpath>app/datapath/</dbpath>
+        <dataType key="anotherDataType>
+            <id>anotherDataTypeIdField</id>
+            <dbpath>app/anotherdatapath/</dbpath>
+        ...
+        <dataType key= ... >
+    </app>
+    -->
+    
+    <app key="sonar">
+        <dtype key="snapshot"> 
+            <id>timestamp</id>
+            <dbpath>sonar/snapshots/</dbpath>
+        </dtype>           
+    </app> 
+             
+  
+    <app key="jira">
+        <dataType key="user"> 
+            <id>userid</id>
+            <dbpath>jira/users/</dbpath> 
+        </dataType>           
+        <dataType key="issue"> 
+            <id>issueid</id>
+            <dbpath>jira/issues/</dbpath> 
+        </dataType>  
+        <dataType key="project"> 
+            <id>projectid</id>
+            <dbpath>jira/projects/</dbpath> 
+        </dataType>   
+    </app>
+         
+    <app key="svn">
+        <!--  completar -->
+    </app>  
+</connectors>
+         
+
