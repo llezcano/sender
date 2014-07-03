@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.sql.Timestamp;
@@ -19,17 +20,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
-
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.xml.sax.InputSource;
-
-
-
 /*
  * Ejemplos:
  * * Consultar todos los documentos en un path dado
  * 		http://localhost:9200/prueba/metrica/_search?pretty=true&q=*:* 
+ * 		donde q seria la consulta
+ * 		
  * * 
  *
  */
@@ -83,14 +79,11 @@ public class Sender extends HttpServlet {
 	private String getJSONFromRequest( HttpServletRequest request ) {
 		// Obtengo el JSON del POST request, ejemplo de un POST:
 		//curl -POST http://localhost:8091/sender/SenderService -H "Content-Type: application/json" --data '{ "name" :"lea"}' 
-		
 		StringBuffer jb = new StringBuffer();
 		String line = null;
 		try {
-
 			if ( ! (request.getContentType().equals("application/json")) ) {
-				System.err.println("Content-Type is: "+ request.getContentType() + "!= application/json") ;	
-				
+				System.err.println("Content-Type is: "+ request.getContentType() + "!= application/json") ;		
 				return null ; 
 			}
 			BufferedReader reader = request.getReader();
@@ -123,11 +116,8 @@ public class Sender extends HttpServlet {
 		
 		/*Se obtienen todos los parametros (uno puede tener varios valores)*/
 		Map<String, String[]> parameters = request.getParameterMap();
-
 		/*Se queda con el primer valor de cada uno*/
-		Map<String, String> paramToJSON = new LinkedHashMap<String, String>();
-		
-		
+		Map<String, String> paramToJSON = new LinkedHashMap<String, String>();		
 		for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
 			paramToJSON.put(entry.getKey(), entry.getValue()[0]);
 			// TODO ver si no se puede hacer tan cabeza (aunque tal vez este bien)
@@ -137,75 +127,47 @@ public class Sender extends HttpServlet {
 				dataKey = entry.getValue()[0] ;				
 			}			
 		}
-
-		// aqui insertamos el time stamp del hook
-		//if( paramToJSON.get( TIMESTAMP ) == null ) {
-		Date date = new Date();
-		paramToJSON.put( TIMESTAMP , new Timestamp( date.getTime() ).toString() );
-		//} 
-		
-		
+	
 		String DataJSON = this.getJSONFromRequest(request) ;
+
 		System.out.println(DataJSON) ;
-		
 		
 		App application = new App( appKey, dataKey, connectorsConf) ;
 		
 		System.out.println("ElasticSearch Path: " + application.getPath() ) ;
-		System.out.println("Data ID: "+ application.getIdField() ) ;
 
-		/*Se validan los datos (se buscan por determinados valores que deben existir)*/
-		if( this.validateParam(paramToJSON) ) {
-			// TODO esto solo se reduciria en reenviar el request, ya que solo cambia el path y host. El dato no.
-			
-			/*Se pasa el Map a JSON*/
-			String jsonText = JSONValue.toJSONString(paramToJSON);
-
-			/*Se genera el ID del dato que va a rpresentarlo en la DB*/
-			String id = this.generateDataID(paramToJSON);
-			
-			
-			
-			try {
-				//URI uri = new URI(  properties.getProperty( HOST ) + properties.getProperty( PATH_TO_STORE ) + id );
-				id = application.getIdField() ; // TODO en realidad aca paso el campo, pero se tendria que extraer del JSON
-				URI uri = new URI(  properties.getProperty( HOST ) + application.getPath() + id );
-
-				//System.out.println(uri.toString());
-				HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
-			
-				conn.setDoOutput(true);
-				conn.setRequestMethod("PUT");
-				conn.addRequestProperty("Content-Type", "application/json");
-				conn.setRequestProperty("Accept", "application/json");
-				OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
-				//out.write(jsonText);
-				out.write(DataJSON);
-				out.flush();
-				out.close();
-				System.err.println(conn.getResponseCode());
-			} catch(Exception err) {
-				err.printStackTrace();
-			}
+		try {
+			//URI uri = new URI(  properties.getProperty( HOST ) + properties.getProperty( PATH_TO_STORE ) + id );
+			URI uri = new URI(  properties.getProperty( HOST ) + application.getPath() + URLId() );
+			//System.out.println(uri.toString());
+			HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
+		
+			conn.setDoOutput(true);
+			conn.setRequestMethod("PUT");
+			conn.addRequestProperty("Content-Type", "application/json");
+			conn.setRequestProperty("Accept", "application/json");
+			OutputStreamWriter out = new OutputStreamWriter(conn.getOutputStream());
+			out.write(DataJSON);
+			out.flush();
+			out.close();
+			System.err.println(conn.getResponseCode());
+		} catch(Exception err) {
+			err.printStackTrace();
 		}
+	
 	}
 
-
-	/**
-	 * @param paramToJSON Mapa con todos los parametros que se reciben
-	 * @return un ID unico par el dato, sin espacios
-	 */
-	private String generateDataID(Map<String, String> paramToJSON) {
-		// TODO generalizar este metodo para que desde un archivo de configuración 
-		// sepa como generar el ID de cada aplicacion para cada tipo de datos 
-		String id = "";
-		id += paramToJSON.get( TIMESTAMP );
-		id += SEPARADOR;
-		id += paramToJSON.get( DATA_TYPE);
-		id += SEPARADOR;
-		id += paramToJSON.get( USER);
-		id = id.replaceAll( "\\s+", SEPARADOR ); //reempla espacios en blanco
-		return id;
+	public String URLId() {
+		Date date = new Date();
+		String id = "" ;
+		try {
+			id = java.net.URLEncoder.encode(new Timestamp( date.getTime() ).toString() , "ISO-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return id ;
+		
 	}
 
 
@@ -223,21 +185,6 @@ public class Sender extends HttpServlet {
 			return false;
 		}
 	}
-
 	
-	/**
-	 * @param paramToJSON Mapa con todos los parametros que se recibieron
-	 * @return si la llamada al servicio se realizo con todos los datos correctos
-	 */
-	private boolean validateParam(Map<String, String> paramToJSON) {
-		return true ;
-		/*
-		if( paramToJSON.get( USER) != null && paramToJSON.get( DATA_TYPE ) != null &&
-				isTimeStampValid( paramToJSON.get( TIMESTAMP ))) {
-			return true;
-		}
-		return false;
-		*/
-	}
 	
 }
