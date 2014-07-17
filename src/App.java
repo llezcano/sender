@@ -34,21 +34,3 @@ public class App {
 	
 	
 }
-
-/* printing inputStream*/ 
-/*
-import java.io.InputStreamReader;
-import java.io.StringReader; 
-import java.io.BufferedReader;
-
-BufferedReader in = new BufferedReader(new InputStreamReader(source));
-String inputLine;
-try {
-	while ((inputLine = in.readLine()) != null)
-	    System.out.println(inputLine);
-	in.close();
-} catch (IOException e1) {
-	// TODO Auto-generated catch block
-	e1.printStackTrace();
-}
-*/

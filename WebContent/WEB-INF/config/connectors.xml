@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <connectors>
-    <!-- connector sample
+    <!-- connector sample 
     
     <app key="myApp">
         <dataType key="myDataType">   
             <id>myDataTypeIdField</id>
-            <dbpath>app/datapath/</dbpath>
+            <dbpath>app/datapath/</dbpath> # las rutas deben tener la forma app/data/
         <dataType key="anotherDataType>
             <id>anotherDataTypeIdField</id>
             <dbpath>app/anotherdatapath/</dbpath>
@@ -14,33 +14,42 @@
         <dataType key= ... >
     </app>
     -->
+    <app key="svn">
+        <dtype key="jira_user">
+            <dbpath>svn/jira_user/</dbpath> 
+        </dtype>
+
+        <dtype key="revisions">
+            <dbpath>svn/revisions/</dbpath> 
+        </dtype>
+    </app>  
     
     <app key="sonar">
         <dtype key="snapshot"> 
-            <id>timestamp</id>
             <dbpath>sonar/snapshots/</dbpath>
         </dtype>           
     </app> 
+      
+    <app key="test">
+        <dtype key="dtest"> 
+            <dbpath>test/dtest/</dbpath>
+        </dtype>           
+    </app>       
              
   
     <app key="jira">
-        <dataType key="user"> 
-            <id>userid</id>
+        <dtype key="user"> 
             <dbpath>jira/users/</dbpath> 
-        </dataType>           
-        <dataType key="issue"> 
-            <id>issueid</id>
+        </dtype>           
+        <dtype key="issue"> 
             <dbpath>jira/issues/</dbpath> 
-        </dataType>  
-        <dataType key="project"> 
-            <id>projectid</id>
+        </dtype>  
+        <dtype key="project"> 
             <dbpath>jira/projects/</dbpath> 
-        </dataType>   
+        </dtype>   
     </app>
          
-    <app key="svn">
-        <!--  completar -->
-    </app>  
+
 </connectors>
          
 
