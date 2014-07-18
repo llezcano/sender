@@ -47,6 +47,7 @@ public class Sender extends HttpServlet {
 
 	private Properties properties;
 	private InputStream connectorsConf ;
+	
 //	private InputSource connectorsSource ;
 	public Sender(){}
 
@@ -112,7 +113,7 @@ public class Sender extends HttpServlet {
 	private void handleRequest(HttpServletRequest request) throws IOException {
 		String appKey = "" ;
 		String dataKey = "" ;
-		
+		String key = "" ;
 		/*Se obtienen todos los parametros (uno puede tener varios valores)*/
 		Map<String, String[]> parameters = request.getParameterMap();
 		/*Se queda con el primer valor de cada uno*/
@@ -124,7 +125,9 @@ public class Sender extends HttpServlet {
 				appKey = entry.getValue()[0] ;
 			} else if (entry.getKey().equals("data"))  {
 				dataKey = entry.getValue()[0] ;				
-			}			
+			} else if (entry.getKey().equals("key"))  {
+				key = entry.getValue()[0] ;		
+			}
 		}
 	
 		String DataJSON = this.getJSONFromRequest(request) ;
@@ -137,7 +140,8 @@ public class Sender extends HttpServlet {
 
 		try {
 			//URI uri = new URI(  properties.getProperty( HOST ) + properties.getProperty( PATH_TO_STORE ) + id );
-			URI uri = new URI(  properties.getProperty( HOST ) + application.getPath() + URLId() );
+			//URI uri = new URI(  properties.getProperty( HOST ) + application.getPath() + URLId() );
+			URI uri = new URI(  properties.getProperty( HOST ) + application.getPath() + key );
 			//System.out.println(uri.toString());
 			HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
 		
